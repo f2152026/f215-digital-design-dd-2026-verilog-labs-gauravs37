@@ -34,6 +34,33 @@ module cla64_hier(
   output        cout
 );
 
-  // TODO: your hierarchical design goes here.
+  wire [15:0] P_blk, G_blk;
+  wire [16:0] c;
+  assign c[0] = cin;
+
+  // Level-1: 16 4-bit CLA blocks
+  genvar i;
+  generate
+    for (i = 0; i < 16; i = i + 1) begin : gen_level1_blocks
+      cla4 U_CLA4 (
+        .a     (a[4*i + 3 : 4*i]),
+        .b     (b[4*i + 3 : 4*i]),
+        .cin   (c[i]),
+        .sum   (sum[4*i + 3 : 4*i]),
+        .cout  (), // Driven globally by Level-2 lookahead
+        .P_blk (P_blk[i]),
+        .G_blk (G_blk[i])
+      );
+    end
+  endgenerate
+
+  // Level-2: Lookahead carry generator across the 16 blocks
+  generate
+    for (i = 0; i < 16; i = i + 1) begin : gen_level2_carries
+      assign #(2) c[i+1] = G_blk[i] | (P_blk[i] & c[i]);
+    end
+  endgenerate
+
+  assign cout = c[16];
 
 endmodule
