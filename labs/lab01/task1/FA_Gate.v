@@ -18,8 +18,9 @@ module FA_Gate(
 
   xor (ps,  a,   b);
   and (pc1, a,   b);
-  xor (sum, cin, ps);
   and (pc2, cin, ps);
   or  (cout, pc1, pc2);
+  xor (sum, cin, ps);
+
 
 endmodule
